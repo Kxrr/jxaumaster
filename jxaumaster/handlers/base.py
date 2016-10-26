@@ -16,3 +16,8 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def response(self):
         return self.write(self.ret)
+
+    def get_current_user(self):
+        session_id = self.get_secure_cookie('session_id')
+        user = {'session_id': session_id}
+        return user
