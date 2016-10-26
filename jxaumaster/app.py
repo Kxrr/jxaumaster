@@ -4,6 +4,7 @@
 import asyncmongo
 
 import tornado.web
+import tornado.gen
 import tornado.options
 import tornado.ioloop
 
@@ -13,12 +14,9 @@ tornado.options.define("port", default=8888, help="run on the given port", type=
 
 
 class MainHandler(BaseHandler):
-    @tornado.web.asynchronous
+    @tornado.gen.coroutine
     def get(self, *args, **kwargs):
-        self.db.student2015.find({'Xm': '梁华'}, callback=self._on_response)
-
-    def _on_response(self, response, error, *args, **kwargs):
-        print
+        pass
 
 
 class Application(tornado.web.Application):
@@ -32,14 +30,6 @@ class Application(tornado.web.Application):
         }
 
         super(Application, self).__init__(handlers=handlers, **settings)
-
-        self.db = asyncmongo.Client(
-            pool_id='default',
-            host='127.0.0.1',
-            port=27017,
-            maxcached=10,
-            dbname='jxau',
-        )
 
 
 def main():
