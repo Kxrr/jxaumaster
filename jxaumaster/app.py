@@ -28,7 +28,7 @@ class Application(tornado.web.Application):
         ]
 
         settings = {
-            'cookie_secret': '9*&3kkcjjiapeiihpeirt',
+            'cookie_secret': b'(\xd0aZ\x87\x0f\x9f\x8c\x95Y0JbD\x12\x8c',
         }
 
         super(Application, self).__init__(handlers=handlers, **settings)
