@@ -21,6 +21,7 @@ class Application(tornado.web.Application):
         handlers = [
             ('/', MainHandler),
             ('/login', LoginHandler),
+            ('/logout', LogoutHandler),
             ('/search/student?', StudentQueryHandler),
 
         ]
