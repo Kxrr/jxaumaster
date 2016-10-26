@@ -5,18 +5,15 @@ import tornado.options
 import tornado.ioloop
 
 from jxaumaster.handlers.base import BaseHandler
+from jxaumaster.handlers.query import StudentQueryHandler
+from jxaumaster.handlers.auth import LoginHandler, LogoutHandler
 
 tornado.options.define("port", default=8888, help="run on the given port", type=int)
 
 
 class MainHandler(BaseHandler):
-    @tornado.gen.coroutine
     def get(self, *args, **kwargs):
-        pass
-
-
-class LoginHandler(BaseHandler):
-    pass
+        self.write('hello')
 
 
 class Application(tornado.web.Application):
@@ -24,6 +21,7 @@ class Application(tornado.web.Application):
         handlers = [
             ('/', MainHandler),
             ('/login', LoginHandler),
+            ('/search/student?', StudentQueryHandler),
 
         ]
 
