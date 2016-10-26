@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from mongoengine import Document, connect
 from mongoengine.fields import *
 
-from jxaumaster.settings import MONGO_HOST, MONGO_PORT, MONGO_DBNAME
+from jxaumaster.config.settings import MONGO_HOST, MONGO_PORT, MONGO_DBNAME
 
 connect(db=MONGO_DBNAME, host=MONGO_HOST, port=MONGO_PORT)
 
@@ -32,4 +32,4 @@ class Student(Document):
 
 
 if __name__ == '__main__':
-    print Student.objects(sid='20121412')
+    pass

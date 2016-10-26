@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
-# https://github.com/bitly/asyncmongo
-# https://github.com/nellessen/Real-Time-Web-App-Stack-with-Python-Tornado/blob/master/chat-asyncmongo-longpolling/app.py
-import asyncmongo
-
 import tornado.web
 import tornado.gen
 import tornado.options
 import tornado.ioloop
 
-from jxaumaster.base import BaseHandler
+from jxaumaster.handlers.base import BaseHandler
 
 tornado.options.define("port", default=8888, help="run on the given port", type=int)
 
@@ -19,10 +15,16 @@ class MainHandler(BaseHandler):
         pass
 
 
+class LoginHandler(BaseHandler):
+    pass
+
+
 class Application(tornado.web.Application):
     def __init__(self):
         handlers = [
             ('/', MainHandler),
+            ('/login', LoginHandler),
+
         ]
 
         settings = {
