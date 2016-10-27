@@ -25,5 +25,5 @@ class LoginHandler(BaseHandler):
 class LogoutHandler(RequestHandler):
     @gen.coroutine
     def get(self, *args, **kwargs):
-        data = yield JxauUtils.login('20142961', '123456')
+        data = yield JxauUtils.fetch('aaa', 'http://jwgl.jxau.edu.cn/Content/Reporters/Keibao/ViewKebiao.aspx?kbtype=xh&xq=20161&usercode=20142961')
         self.write(data.body)

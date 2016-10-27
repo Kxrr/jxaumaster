@@ -25,19 +25,21 @@ class JxauUtils(object):
     }
 
     LOGIN_URL = 'http://jwgl.jxau.edu.cn/User/CheckLogin'
-    SCHEDULE_URL = 'http://jwgl.jxau.edu.cn/Content/Reporters/Keibao/ViewKebiao.aspx?kbtype=xh&xq=20151&usercode={sid}'
+    SCHEDULE_URL = 'http://jwgl.jxau.edu.cn/Content/Reporters/Keibao/ViewKebiao.aspx?kbtype=xh&xq=20161&usercode={sid}'
 
     @classmethod
     def get_headers_with_cookies(cls, cookies):
+        cookies = cookies or ''
         headers = cls.HEADERS.copy()
         headers.update({'Cookie': cookies})
         return headers
 
     @classmethod
+    @gen.coroutine
     def get_name(cls, sid):
-        pattern = re.compile('')
+        pattern = re.compile('第.学期(.*?)\(')
         rsp = yield AsyncHTTPClient().fetch(cls.SCHEDULE_URL.format(sid=sid))
-        m = pattern.search(rsp.body)
+        m = pattern.search(rsp.body.decode('utf-8'))
         if m:
             raise gen.Return(m.group(1))
         raise gen.Return('')
@@ -80,10 +82,39 @@ class JxauUtils(object):
             result.username = username
             result.password = password
             result.name = yield cls.get_name(sid=username)
+            rsp2 = yield cls.fetch(result.cookies, next_url)
+            result.body = rsp2.body
             raise gen.Return(result)
         else:
             result.body = rsp.body
             raise gen.Return(result)
+
+    @classmethod
+    def fetch(cls, cookies, url, request_kw=None, fetch_kw=None):
+        """
+        :type cookies: basestring
+        :type url: unicode | basestring
+        :type request_kw: dict
+        :type fetch_kw: dict
+        :return:
+        """
+        request_kw = request_kw or {}
+        fetch_kw = fetch_kw or {}
+        return AsyncHTTPClient().fetch(
+            HTTPRequest(
+                url=url,
+                headers=cls.get_headers_with_cookies(cookies),
+                **request_kw,
+            ),
+            **fetch_kw
+        )
+
+    @classmethod
+    def get_client(cls, cookies=''):
+        headers = cls.get_headers_with_cookies(cookies)
+        AsyncHTTPClient.configure(None, defaults={'headers': headers})
+        client = AsyncHTTPClient()
+        return client
 
     def get_grade(self, term=None):
         if not term:
