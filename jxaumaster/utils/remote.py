@@ -12,6 +12,10 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 from jxaumaster.utils.object import AttributeDict
 
 
+class Session(AttributeDict):
+    pass
+
+
 class JxauUtils(object):
     HEADERS = {
         'Host': 'jwgl.jxau.edu.cn',
@@ -75,19 +79,17 @@ class JxauUtils(object):
         loc = ' '.join(rsp.headers.get_list('Location'))
         next_url = urljoin(cls.LOGIN_URL, loc)
 
-        result = AttributeDict()
+        session = Session()
         if login_success(rsp.code, escape.to_unicode(escape.url_unescape(next_url))):
-            result.cookies = '; '.join(rsp.headers.get_list('Set-Cookie'))
-            result.guid = next_url[35:]
-            result.username = username
-            result.password = password
-            result.name = yield cls.get_name(sid=username)
-            rsp2 = yield cls.fetch(result.cookies, next_url)
-            result.body = rsp2.body
-            raise gen.Return(result)
+            session.cookies = '; '.join(rsp.headers.get_list('Set-Cookie'))
+            session.guid = next_url[35:]
+            session.username = username
+            session.password = password
+            session.name = yield cls.get_name(sid=username)
+            raise gen.Return(session)
         else:
-            result.body = rsp.body
-            raise gen.Return(result)
+            session.body = rsp.body
+            raise gen.Return(session)
 
     @classmethod
     def fetch(cls, cookies, url, request_kw=None, fetch_kw=None):
@@ -100,21 +102,9 @@ class JxauUtils(object):
         """
         request_kw = request_kw or {}
         fetch_kw = fetch_kw or {}
-        return AsyncHTTPClient().fetch(
-            HTTPRequest(
-                url=url,
-                headers=cls.get_headers_with_cookies(cookies),
-                **request_kw,
-            ),
-            **fetch_kw
-        )
 
-    @classmethod
-    def get_client(cls, cookies=''):
-        headers = cls.get_headers_with_cookies(cookies)
-        AsyncHTTPClient.configure(None, defaults={'headers': headers})
-        client = AsyncHTTPClient()
-        return client
+        request = HTTPRequest(url=url, headers=cls.get_headers_with_cookies(cookies), **request_kw)
+        return AsyncHTTPClient().fetch(request, **fetch_kw)
 
     def get_grade(self, term=None):
         if not term:
@@ -127,7 +117,6 @@ class JxauUtils(object):
             if each_dict['Xq'] == str(term):
                 self.grade_result.append(each_dict)
         return self.grade_result
-
 
     def get_exam_time(self, term=None):
         if not term:
@@ -144,11 +133,11 @@ class JxauUtils(object):
         self.exam_dict = self.exam_dict_a['Data']
         return self.exam_dict
 
-    def post_advice(self):
-        self.data_advice = {
-            "content": "Jxau.ga " + str(strftime('%Y%m%d')) + " Advice\n" + self.advice_content
-        }
-        self.exam_response_advice = requests.post('http://push.kxrr.us/write_email', data=self.data_advice).content
+    # def post_advice(self):
+    #     self.data_advice = {
+    #         "content": "Jxau.ga " + str(strftime('%Y%m%d')) + " Advice\n" + self.advice_content
+    #     }
+    #     self.exam_response_advice = requests.post('http://push.kxrr.us/write_email', data=self.data_advice).content
 
     def get_rate_list(self):
         url = 'http://jwgl.jxau.edu.cn/Views/Xscp/GetCpnrForXs' + self.guid
