@@ -39,10 +39,6 @@ class User(AttributeDict):
         super(User, self).__init__(**kwargs)
 
 
-class Grade(object):
-    pass
-
-
 class JxauUtils(object):
     HEADERS = {
         'Host': 'jwgl.jxau.edu.cn',

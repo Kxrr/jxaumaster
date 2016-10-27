@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import uuid
 import base64
 import pickle
 
 import tornado.web
-import uuid
 
 
 class BaseHandler(tornado.web.RequestHandler):
