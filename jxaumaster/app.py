@@ -5,7 +5,7 @@ import tornado.options
 import tornado.ioloop
 
 from jxaumaster.handlers.base import BaseHandler
-from jxaumaster.handlers.query import StudentQueryHandler
+from jxaumaster.handlers.query import StudentQueryHandler, GradeQueryHandler
 from jxaumaster.handlers.auth import LoginHandler, LogoutHandler, ValidateHandler
 
 tornado.options.define("port", default=8888, help="run on the given port", type=int)
@@ -23,7 +23,9 @@ class Application(tornado.web.Application):
             ('/login', LoginHandler),
             ('/logout', LogoutHandler),
             ('/validate', ValidateHandler),
-            ('/search/student?', StudentQueryHandler),
+            ('/student?', StudentQueryHandler),
+            ('/student/grade?', GradeQueryHandler),
+
         ]
 
         settings = {

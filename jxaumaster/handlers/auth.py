@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # https://github.com/bdarnell/async_dropbox/blob/master/demo/main.py
+import functools
+
 from tornado import gen
 from tornado.web import authenticated
 

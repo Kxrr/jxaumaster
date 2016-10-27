@@ -1,10 +1,28 @@
 # -*- coding: utf-8 -*-
+from tornado.web import authenticated
+from tornado import gen
+
 from jxaumaster.handlers.base import BaseHandler
 from jxaumaster.data.models import Student
+from jxaumaster.utils.remote import JxauUtils
+
+
+class GradeQueryHandler(BaseHandler):
+    """
+    查询成绩
+    """
+
+    @authenticated
+    @gen.coroutine
+    def get(self, *args, **kwargs):
+        grades = yield JxauUtils.get_grade(user=self.current_user)
+        self.produce(grades=grades)
+        self.response()
 
 
 class StudentQueryHandler(BaseHandler):
     """
+    查询学生信息
     TODO: __contains...支持, 添加动态参数(phone_url)
     """
 
