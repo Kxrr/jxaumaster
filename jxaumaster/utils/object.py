@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
 class AttributeDictMixin(object):
     def __getattr__(self, k):
         try:

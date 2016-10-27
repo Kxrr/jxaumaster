@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from tornado.web import authenticated
 from tornado import gen
 
@@ -73,16 +75,31 @@ class Builder(object):
         return _q
 
     def build_custom_kw(self):
-        """
-        :return:
-        """
         _q = {}
         hometown = self.query_kw.pop('hometown', None)
         if hometown:
             _q['hometown'] = self.fix_hometown(hometown)
         return _q
 
-    def fix_hometown(self, ht):
+    @staticmethod
+    def fix_hometown(ht):
+        WEIGHTS = {
+            'prov': 30,
+            'city': 25,
+            'county': 20,
+            'district': 15,
+        }
+
+        if not isinstance(ht, unicode):
+            ht = ht.decode('utf-8')
+        pattern = re.compile(r'(?P<prov>.*省)?(?P<city>.*市)?(?P<county>.*县)?(?P<district>.*区)?')
+        m = pattern.search(ht)
+        if m:
+            d = m.groupdict()
+            box = {WEIGHTS[k]: v for k, v in d.items() if v}
+            if box:
+                return box[min(box.keys())]
+
         return ht
 
 

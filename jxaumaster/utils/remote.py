@@ -142,7 +142,7 @@ class JxauUtils(object):
         """
         :type raw_grades: list
         """
-        name_map = {
+        NAME_MAP = {
             'Kcmc': 'class_name',
             'Xm': 'student_name',
             'Xq': 'term',
@@ -150,7 +150,7 @@ class JxauUtils(object):
             'Zpcj': 'grade',
         }
 
-        return [Mapper(grade, name_map) for grade in raw_grades]
+        return [Mapper(grade, NAME_MAP) for grade in raw_grades]
 
     @classmethod
     @gen.coroutine
