@@ -6,7 +6,7 @@ import tornado.ioloop
 
 from jxaumaster.handlers.base import BaseHandler
 from jxaumaster.handlers.query import StudentQueryHandler
-from jxaumaster.handlers.auth import LoginHandler, LogoutHandler
+from jxaumaster.handlers.auth import LoginHandler, LogoutHandler, ValidateHandler
 
 tornado.options.define("port", default=8888, help="run on the given port", type=int)
 
@@ -22,12 +22,13 @@ class Application(tornado.web.Application):
             ('/', MainHandler),
             ('/login', LoginHandler),
             ('/logout', LogoutHandler),
+            ('/validate', ValidateHandler),
             ('/search/student?', StudentQueryHandler),
-
         ]
 
         settings = {
             'cookie_secret': b'(\xd0aZ\x87\x0f\x9f\x8c\x95Y0JbD\x12\x8c',
+            'login_url': '/login',
         }
 
         super(Application, self).__init__(handlers=handlers, **settings)

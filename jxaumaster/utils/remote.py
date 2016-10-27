@@ -12,8 +12,8 @@ from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 from jxaumaster.utils.object import AttributeDict
 
 
-class Session(AttributeDict):
-    pass
+class User(AttributeDict):
+    version = 0.1
 
 
 class JxauUtils(object):
@@ -79,17 +79,17 @@ class JxauUtils(object):
         loc = ' '.join(rsp.headers.get_list('Location'))
         next_url = urljoin(cls.LOGIN_URL, loc)
 
-        session = Session()
+        user = User()
         if login_success(rsp.code, escape.to_unicode(escape.url_unescape(next_url))):
-            session.cookies = '; '.join(rsp.headers.get_list('Set-Cookie'))
-            session.guid = next_url[35:]
-            session.username = username
-            session.password = password
-            session.name = yield cls.get_name(sid=username)
-            raise gen.Return(session)
+            user.cookies = '; '.join(rsp.headers.get_list('Set-Cookie'))
+            user.guid = next_url[35:]
+            user.username = username
+            user.password = password
+            user.name = yield cls.get_name(sid=username)
+            raise gen.Return(user)
         else:
-            session.body = rsp.body
-            raise gen.Return(session)
+            user.body = rsp.body
+            raise gen.Return(user)
 
     @classmethod
     def fetch(cls, cookies, url, request_kw=None, fetch_kw=None):

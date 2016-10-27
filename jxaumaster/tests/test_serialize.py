@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 from jxaumaster.handlers.base import BaseHandler
-from jxaumaster.utils.remote import Session
+from jxaumaster.utils.remote import User
 
 
 class TestSerialize(unittest.TestCase):
@@ -16,5 +16,5 @@ class TestSerialize(unittest.TestCase):
             self.assertEqual(data, BaseHandler.loads(dumped))
 
     def test_serialize_session(self):
-        session = Session(name='赵四')
+        session = User(name='赵四')
         self.assertEqual(session, BaseHandler.loads(BaseHandler.dumps(session)))

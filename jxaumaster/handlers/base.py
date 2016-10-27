@@ -13,7 +13,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def prepare(self):
         self.set_header('Content-Type', 'application/json')
-        self.ret = {'uuid': str(uuid.uuid4())}
+        self.ret = {'uuid': str(uuid.uuid4()), 'status': True}
 
     def produce(self, **kwargs):
         for k, v in kwargs.items():
@@ -23,10 +23,10 @@ class BaseHandler(tornado.web.RequestHandler):
         return self.write(self.ret)
 
     def get_current_user(self):
-        session = self.get_secure_cookie('session')
-        if session:
-            session = self.loads(session)
-            return session
+        user = self.get_secure_cookie('user')
+        if user:
+            user = self.loads(user)
+            return user
         else:
             return None
 
