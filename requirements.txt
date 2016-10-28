@@ -3,3 +3,4 @@ tornado==4.4.2
 Scrapy==1.2.1
 mongoengine==0.10.6
 asyncmongo==1.3
+mock==2.0.0

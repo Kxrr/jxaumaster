@@ -82,18 +82,10 @@ class JxauUtils(object):
 
     @classmethod
     @gen.coroutine
-    def login(cls, username, password):
+    def _login(cls, post_data):
+        """向学校服务器发送登录请求"""
         # http://www.tornadoweb.org/en/stable/httpclient.html#tornado.httpclient.AsyncHTTPClient
-        client = AsyncHTTPClient()
-
-        post_data = {
-            'UserName': username,
-            'PassWord': password,
-            'validation': '',
-        }
-
-        # 发送登录请求
-        rsp = yield client.fetch(
+        rsp = yield AsyncHTTPClient().fetch(
             HTTPRequest(
                 url=cls.LOGIN_URL,
                 method='POST',
@@ -103,6 +95,18 @@ class JxauUtils(object):
             ),
             raise_error=False,
         )
+        raise gen.Return(rsp)
+
+    @classmethod
+    @gen.coroutine
+    def login(cls, username, password):
+        post_data = {
+            'UserName': username,
+            'PassWord': password,
+            'validation': '',
+        }
+
+        rsp = yield cls._login(post_data)
 
         def login_success(code, url):
             return (code in [200, 302]) and ('用户名或密码错误' not in url)

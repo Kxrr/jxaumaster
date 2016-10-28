@@ -6,3 +6,14 @@
 
 之前项目使用Flask实现, 该项目的目的是用tornado重写并实现前后端分离
 
+
+## TODO
+
+### Backend
+
+- CI
+- Re-login
+- API document 
+
+### Frontend
+
