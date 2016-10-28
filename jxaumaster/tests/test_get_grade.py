@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 import unittest
 
 from jxaumaster.utils.remote import JxauUtils
@@ -1306,4 +1305,4 @@ class TestGrade(unittest.TestCase):
         pass
 
     def test_mapper(self):
-        assert JxauUtils._map_grades(RAW_GRADES)
+        assert JxauUtils._map(RAW_GRADES, JxauUtils.GRADE_NAME_MAP)

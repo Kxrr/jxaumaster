@@ -35,7 +35,6 @@ class Student(MyDocument):
         'strict': False
     }
 
-
     def __str__(self):
         return unicode(self).encode('utf-8')
 

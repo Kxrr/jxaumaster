@@ -9,6 +9,18 @@ from jxaumaster.data.models import Student
 from jxaumaster.utils.remote import JxauUtils
 
 
+class ExamQueryHandler(BaseHandler):
+    """查询考试安排"""
+
+    @authenticated
+    @gen.coroutine
+    def get(self, *args, **kwargs):
+        term = self.get_argument('term', default='20152')
+        exams = yield JxauUtils.get_exam_time(user=self.current_user, term=term)
+        self.produce(exams=exams)
+        self.response()
+
+
 class GradeQueryHandler(BaseHandler):
     """
     查询成绩
@@ -17,7 +29,8 @@ class GradeQueryHandler(BaseHandler):
     @authenticated
     @gen.coroutine
     def get(self, *args, **kwargs):
-        grades = yield JxauUtils.get_grade(user=self.current_user)
+        term = self.get_argument('term', default='20152')
+        grades = yield JxauUtils.get_grade(user=self.current_user, term=term)
         self.produce(grades=grades)
         self.response()
 

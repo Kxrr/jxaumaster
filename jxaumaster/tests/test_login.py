@@ -41,7 +41,3 @@ class TestLogin(AsyncHTTPTestCase):
     def _post(self, data):
         rsp = self.fetch('/login', method='POST', body=encode(data))
         return loads(rsp.body)
-
-    @patch.object(JxauUtils, '_login')
-    def test_mock(self, mock_response):
-        mock_response.code = 302

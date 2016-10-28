@@ -14,6 +14,7 @@
 - CI
 - Re-login
 - API document 
+- Logger
 
 ### Frontend
 

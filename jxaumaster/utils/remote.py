@@ -51,9 +51,26 @@ class JxauUtils(object):
         'Connection': 'keep-alive'
     }
 
+    GRADE_NAME_MAP = {
+        'Kcmc': 'class_name',
+        'Xm': 'student_name',
+        'Xq': 'term',
+        'Kclb': 'class_category',
+        'Zpcj': 'grade',
+    }
+
+    EXAM_NAME_MAP = {
+        'Kcmc': 'class_name',
+        'Xq': 'term',
+        'Khfs': 'type',
+        'KsSj': 'time',
+        'Ksdd': 'room',
+    }
+
     LOGIN_URL = 'http://jwgl.jxau.edu.cn/User/CheckLogin'
     SCHEDULE_URL = 'http://jwgl.jxau.edu.cn/Content/Reporters/Keibao/ViewKebiao.aspx?kbtype=xh&xq=20161&usercode={sid}'
     GRADE_URL = 'http://jwgl.jxau.edu.cn/SystemManage/CJManage/GetXsCjByXh/{guid}'
+    EXAM_URL = 'http://jwgl.jxau.edu.cn/PaiKaoManage/KaoShiAnPaiChaXunManage/GetKaoShiInfo_Student/{guid}'
     INDEX_URL = 'http://jwgl.jxau.edu.cn/Main/Index/{guid}'
 
     @classmethod
@@ -68,17 +85,12 @@ class JxauUtils(object):
     def get_name(cls, sid):
         """姓名"""
         pattern = re.compile('第.学期(.*?)\(')
-        rsp = yield AsyncHTTPClient().fetch(cls.get_schedule_url(sid))
+        rsp = yield AsyncHTTPClient().fetch(cls.SCHEDULE_URL.format(sid=sid))
         m = pattern.search(rsp.body.decode('utf-8'))
 
         if m:
             raise gen.Return(m.group(1))
         raise gen.Return('')
-
-    @classmethod
-    def get_schedule_url(cls, sid):
-        """课表"""
-        return cls.SCHEDULE_URL.format(sid=sid)
 
     @classmethod
     @gen.coroutine
@@ -114,17 +126,15 @@ class JxauUtils(object):
         loc = ' '.join(rsp.headers.get_list('Location'))
         next_url = urljoin(cls.LOGIN_URL, loc)
 
-        user = User()
         if login_success(rsp.code, escape.to_unicode(escape.url_unescape(next_url))):
+            user = User()
             user.cookies = '; '.join(rsp.headers.get_list('Set-Cookie'))
             user.guid = next_url[35:]
             user.username = username
             user.password = password
             user.name = yield cls.get_name(sid=username)
             raise gen.Return(user)
-        else:
-            user.body = rsp.body
-            raise gen.Return(user)
+        raise gen.Return(None)
 
     @classmethod
     def _fetch(cls, cookies, url, request_kw=None, fetch_kw=None):
@@ -142,46 +152,48 @@ class JxauUtils(object):
         return AsyncHTTPClient().fetch(request, **fetch_kw)
 
     @classmethod
-    def _map_grades(cls, raw_grades):
+    def _map(cls, raw_list, name_map):
         """
-        :type raw_grades: list
+        :type raw_list: list[dict]
+        :type name_map: dict
         """
-        NAME_MAP = {
-            'Kcmc': 'class_name',
-            'Xm': 'student_name',
-            'Xq': 'term',
-            'Kclb': 'class_category',
-            'Zpcj': 'grade',
-        }
+        return [Mapper(raw, name_map) for raw in raw_list]
 
-        return [Mapper(grade, NAME_MAP) for grade in raw_grades]
+    @classmethod
+    def _term_filter(cls, term, _list):
+        return filter(lambda d: d.get('term') == str(term), _list)
 
     @classmethod
     @gen.coroutine
-    def get_grade(cls, user, term='20152'):
+    def get_grade(cls, user, term):
         """成绩"""
         url = cls.GRADE_URL.format(guid=user.guid)
         rsp = yield cls._fetch(cookies=user.cookies, url=url, request_kw={'method': 'POST', 'body': encode({})})
+
         raw_grades = loads(rsp.body).get('Data')
-        grades = cls._map_grades(raw_grades)
-        filtered_grades = filter(lambda d: d.get('term') == str(term), grades)
+        grades = cls._map(raw_grades, cls.GRADE_NAME_MAP)
+        filtered_grades = cls._term_filter(term, grades)
         raise gen.Return(filtered_grades)
 
-        # def get_exam_time(self, term=None):
-        #     if not term:
-        #         term = self.term_exam
-        #     self.exam_url_a = "http://jwgl.jxau.edu.cn/PaiKaoManage/KaoShiAnPaiChaXunManage/GetKaoShiInfo_Student"
-        #     self.exam_url = self.exam_url_a + self.guid
-        #     self.exam_data = {
-        #         "Xq": term,
-        #         "limit": "100",
-        #         "start": "0"
-        #     }
-        #     self.exam_response = self.s.post(url=self.exam_url, headers=self.HEADERS, data=self.exam_data)
-        #     self.exam_dict_a = self.exam_response.json()
-        #     self.exam_dict = self.exam_dict_a['Data']
-        #     return self.exam_dict
+    @classmethod
+    @gen.coroutine
+    def get_exam_time(cls, user, term):
+        """考试安排"""
+        p = {
+            'Xq': term,
+            'limit': '100',
+            'start': '0'
+        }
+        url = cls.EXAM_URL.format(guid=user.guid)
+        rsp = yield cls._fetch(cookies=user.cookies, url=url, request_kw={'method': 'POST', 'body': encode(p)})
 
+        raw_exams = loads(rsp.body).get('Data')
+        exams = cls._map(raw_exams, cls.EXAM_NAME_MAP)
+        filtered_schedules = cls._term_filter(term, exams)
+        raise gen.Return(filtered_schedules)
+
+    def undo(self):
+        pass
         # def post_advice(self):
         #     self.data_advice = {
         #         "content": "Jxau.ga " + str(strftime('%Y%m%d')) + " Advice\n" + self.advice_content
