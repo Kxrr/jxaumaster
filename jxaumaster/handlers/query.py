@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import re
 
 from tornado.web import authenticated
@@ -38,29 +40,26 @@ class GradeQueryHandler(BaseHandler):
 class StudentQueryHandler(BaseHandler):
     """
     查询学生信息
-    TODO: __contains...支持, 添加动态参数(phone_url)
     """
 
     def get(self, *args, **kwargs):
         q = self.get_argument('q', strip=True, default='').split(',')
         field_filter = self.get_argument('only', '', strip=True).split(',')
         photo = self.get_argument('photo', False)
-
-        students = StudentQuery(Builder(q)).query(field_filter)
-
+        students = StudentQuery(QueryBuilder(q)).query(field_filter)
         if photo:
-            self.attach_phone_link(students)
-
+            self.attach_photo_url(students)
         self.produce(students=students)
         self.response()
 
-    def attach_phone_link(self, students):
+    @staticmethod
+    def attach_photo_url(students):
         for student in students:
-            student['phone_link'] = 'http://prefix/{}'.format(student['sid'])
+            student['photo_url'] = 'http://prefix/{}'.format(student['sid'])
         return students
 
 
-class Builder(object):
+class QueryBuilder(object):
     """
     配置Document.objects所需的参数
     """
@@ -84,56 +83,50 @@ class Builder(object):
         for k, v in self.query_kw.copy().items():
             if k in self.AVAILABLE_FIELDS:
                 _q[k] = v
-                self.query_kw.pop(k, None)  # 这里处理过后续就不需要处理了
+                self.query_kw.pop(k, None)  # 后续不需要处理
         return _q
 
     def build_custom_kw(self):
         _q = {}
-        hometown = self.query_kw.pop('hometown', None)
+        hometown = self.query_kw.pop('hometown', '')
         if hometown:
-            _q['hometown'] = self.fix_hometown(hometown)
+            _q['hometown__contains'] = self.fix_hometown(hometown)
         return _q
 
     @staticmethod
-    def fix_hometown(ht):
+    def fix_hometown(text):
         WEIGHTS = {
             'prov': 30,
             'city': 25,
             'county': 20,
             'district': 15,
         }
-
-        if not isinstance(ht, unicode):
-            ht = ht.decode('utf-8')
+        text = text.decode('utf-8') if not isinstance(text, unicode) else text
         pattern = re.compile(r'(?P<prov>.*省)?(?P<city>.*市)?(?P<county>.*县)?(?P<district>.*区)?')
-        m = pattern.search(ht)
+        m = pattern.search(text)
         if m:
             d = m.groupdict()
             box = {WEIGHTS[k]: v for k, v in d.items() if v}
             if box:
-                return box[min(box.keys())]
+                return box[min(box.keys())].strip()
+        return text
 
-        return ht
 
-
-class Query(object):
+class StudentQuery(object):
     """
     执行查询并做一些后续工作, 比如only
     """
+    DEFAULT_EXCLUDES = {'id', 'birthday'}
 
     def __init__(self, builder):
         self.builder = builder
-
-
-class StudentQuery(Query):
-    DEFAULT_EXCLUDES = {'id', }
 
     def query(self, field_filter):
         """
         :rtype: dict
         """
         objects_kw = self.builder.build()
-        students = Student.objects(**objects_kw).exclude(*self.DEFAULT_EXCLUDES)
+        students = Student.objects(**objects_kw).exclude(*self.DEFAULT_EXCLUDES).limit(100)
 
         if any(field_filter):
             students = students.only(*field_filter)

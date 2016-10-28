@@ -1301,6 +1301,7 @@ RAW_GRADES = loads("""
 
 
 class TestGrade(unittest.TestCase):
+
     def test_get_grade(self):
         pass
 

@@ -37,9 +37,13 @@ class Application(tornado.web.Application):
         super(Application, self).__init__(handlers=handlers, **settings)
 
 
+def make_app():
+    return Application()
+
+
 def main():
     tornado.options.parse_command_line()
-    application = Application()
+    application = make_app()
     application.listen(tornado.options.options.port)
     tornado.ioloop.IOLoop.instance().start()
 
