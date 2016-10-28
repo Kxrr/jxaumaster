@@ -4,3 +4,4 @@ MONGO_PORT = 27017
 MONGO_DBNAME = 'jxau'
 MONGO_COLLNAME = 'student_201610'
 
+COOKIES_NAME = 'session'

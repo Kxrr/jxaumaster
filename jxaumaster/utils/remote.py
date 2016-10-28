@@ -121,7 +121,7 @@ class JxauUtils(object):
         rsp = yield cls._login(post_data)
 
         def login_success(code, url):
-            return (code in [200, 302]) and ('用户名或密码错误' not in url)
+            return (code in [200, 302]) and ('用户名或密码错误' not in url) and ('login=false' not in url)
 
         loc = ' '.join(rsp.headers.get_list('Location'))
         next_url = urljoin(cls.LOGIN_URL, loc)

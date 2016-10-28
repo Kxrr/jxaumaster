@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # https://github.com/bdarnell/async_dropbox/blob/master/demo/main.py
-import functools
-
 from tornado import gen
 from tornado.web import authenticated
 
+from jxaumaster.config.settings import COOKIES_NAME
+from jxaumaster.data.r_models import db_session, Session
 from jxaumaster.handlers.base import BaseHandler
 from jxaumaster.utils.remote import JxauUtils
 
@@ -24,7 +24,11 @@ class LoginHandler(BaseHandler):
 
     def set_user_cookie(self, user):
         if user:
-            self.set_secure_cookie('user', self.dumps(user))
+            session = Session.store(user)
+            s = db_session()
+            s.add(session)
+            s.commit()
+            self.set_secure_cookie(COOKIES_NAME, str(session.session_key))
             self.produce(user={'name': user.name, 'username': user.username, 'guid': user.guid})  # 登录成功后有guid
         else:
             self.produce(status=False)
@@ -33,7 +37,7 @@ class LoginHandler(BaseHandler):
 class LogoutHandler(BaseHandler):
     @gen.coroutine
     def get(self, *args, **kwargs):
-        self.set_secure_cookie('user', '')
+        self.set_secure_cookie(COOKIES_NAME, '')
         self.produce(status=True)
         self.response()
 

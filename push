@@ -1,0 +1,2 @@
+git push ${@:1} origin new:new
+git push ${@:1} github new:master

@@ -5,6 +5,9 @@ import uuid
 import base64
 import pickle
 
+from jxaumaster.config.settings import COOKIES_NAME
+from jxaumaster.data.r_models import db_session, Session
+
 import tornado.web
 
 
@@ -23,12 +26,15 @@ class BaseHandler(tornado.web.RequestHandler):
         return self.write(self.ret)
 
     def get_current_user(self):
-        user = self.get_secure_cookie('user')
-        if user:
-            user = self.loads(user)
-            return user
-        else:
-            return None
+        session_key = self.get_secure_cookie(COOKIES_NAME)
+        s = db_session()
+        sessions = s.query(Session).filter_by(session_key=session_key)
+        if sessions:
+            session = sessions.one()
+            if session.is_valid():
+                user = session.get_decoded()
+                return user
+        return None
 
     @classmethod
     def dumps(cls, data):
