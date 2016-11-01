@@ -45,7 +45,7 @@ class LogoutHandler(BaseHandler):
 class ValidateHandler(BaseHandler):
     @authenticated
     def get(self, *args, **kwargs):
-        self.produce(status=True, user_session=dict(self.current_user))
+        self.produce(user_session=dict(self.current_user))
         self.response()
 
 

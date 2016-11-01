@@ -15,7 +15,7 @@ class BaseHandler(tornado.web.RequestHandler):
     ret = None
 
     def prepare(self):
-        self.set_header('Content-Type', 'application/json')
+        self.set_header('Content-Type'.encode('utf-8'), 'application/json')
         self.ret = {'uuid': str(uuid.uuid4()), 'status': True}
 
     def produce(self, **kwargs):
