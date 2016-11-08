@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import tornado.web
 import tornado.gen
-import tornado.options
 import tornado.ioloop
+from tornado.options import define, options
 
 from jxaumaster.handlers.base import BaseHandler
 from jxaumaster.handlers.query import StudentQueryHandler, GradeQueryHandler, ExamQueryHandler
 from jxaumaster.handlers.auth import LoginHandler, LogoutHandler, ValidateHandler, FreshHandler
+from jxaumaster.utils.log import logger
 
-tornado.options.define("port", default=8888, help="run on the given port", type=int)
+define("port", default=8888, help="run on the given port", type=int)
 
 
 class MainHandler(BaseHandler):
@@ -42,9 +43,11 @@ def make_app():
 
 
 def main():
-    tornado.options.parse_command_line()
+    options.parse_command_line()
+
     application = make_app()
-    application.listen(tornado.options.options.port)
+    application.listen(options.port)
+    logger.info('Running on http://127.0.0.1:{0}'.format(options.port))
     tornado.ioloop.IOLoop.instance().start()
 
 
