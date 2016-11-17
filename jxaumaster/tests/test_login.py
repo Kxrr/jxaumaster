@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from mock import patch, Mock
 from tornado.concurrent import Future
 
-from jxaumaster.utils.funtional import encode, loads
 from jxaumaster.tests import AsyncHTTPTestCase
 from jxaumaster.utils.remote import JxauUtils
 
@@ -27,7 +26,7 @@ class TestLogin(AsyncHTTPTestCase):
         _mock.return_value = future
 
         data = self._post({'username': '20140000', 'password': 'should_be_right'})
-        self.assertTrue(data['status'])
+        self.assert_response_success(data)
 
         user = data.get('user')
         self.assertTrue(user)
@@ -36,8 +35,7 @@ class TestLogin(AsyncHTTPTestCase):
 
     def test_login_fail(self):
         data = self._post({'username': '20120000', 'password': '000000'})
-        self.assertFalse(data['status'])
+        self.assert_response_failure(data)
 
     def _post(self, data):
-        rsp = self.fetch('/login', method='POST', body=encode(data))
-        return loads(rsp.body)
+        return self.post('/login', data)

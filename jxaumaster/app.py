@@ -25,9 +25,10 @@ class Application(tornado.web.Application):
             ('/logout', LogoutHandler),
             ('/fresh_login', FreshHandler),
             ('/validate', ValidateHandler),
-            ('/students?', StudentQueryHandler),
+            ('/search/student?', StudentQueryHandler),
             ('/student/grade?', GradeQueryHandler),
             ('/student/exam?', ExamQueryHandler),
+            ('.*', BaseHandler),
         ]
 
         settings = {

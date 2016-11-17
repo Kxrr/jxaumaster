@@ -31,14 +31,15 @@ class LoginHandler(BaseHandler):
             self.set_secure_cookie(COOKIES_NAME, str(session.session_key))
             self.produce(user={'name': user.name, 'username': user.username, 'guid': user.guid})  # 登录成功后有guid
         else:
-            self.produce(status=False)
+            # TODO: 登录失败如何返回
+            # self.produce(status=False)
+            raise ValueError
 
 
 class LogoutHandler(BaseHandler):
     @gen.coroutine
     def get(self, *args, **kwargs):
         self.set_secure_cookie(COOKIES_NAME, '')
-        self.produce(status=True)
         self.response()
 
 

@@ -12,11 +12,18 @@ import tornado.web
 
 
 class BaseHandler(tornado.web.RequestHandler):
-    ret = None
+
+    def __init__(self, *args, **kwargs):
+        self.ret = {}
+        self.request_id = str(uuid.uuid4())
+
+        super(BaseHandler, self).__init__(*args, **kwargs)
+
+    def get(self, *args, **kwargs):
+        self.write_error(404)
 
     def prepare(self):
         self.set_header('Content-Type'.encode('utf-8'), 'application/json')
-        self.ret = {'uuid': str(uuid.uuid4()), 'status': True}
 
     def produce(self, **kwargs):
         for k, v in kwargs.items():
@@ -28,9 +35,8 @@ class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         session_key = self.get_secure_cookie(COOKIES_NAME)
         s = db_session()
-        sessions = s.query(Session).filter_by(session_key=session_key)
-        if sessions:
-            session = sessions.one()
+        session = s.query(Session).filter_by(session_key=session_key).first()
+        if session:
             if session.is_valid():
                 user = session.get_decoded()
                 return user
@@ -46,6 +52,15 @@ class BaseHandler(tornado.web.RequestHandler):
         data = base64.b64decode(string)
         return pickle.loads(data[::-1])
 
+    def write_error(self, status_code, **kwargs):
+        error = {
+            'message': '',
+            # 'type': str(e.__class__.__name__),
+            'code': status_code,
+            'trace_id': self.request_id,
+        }
+        self.produce(error=error)
+        return self.response()
 
 if __name__ == '__main__':
     pass
