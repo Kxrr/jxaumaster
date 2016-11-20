@@ -4,7 +4,7 @@ import tornado.gen
 import tornado.ioloop
 from tornado.options import define, options
 
-from jxaumaster.handlers.base import BaseHandler, BaseStaticFileHandler
+from jxaumaster.handlers.base import BaseHandler
 from jxaumaster.handlers.query import StudentQueryHandler, GradeQueryHandler, ExamQueryHandler
 from jxaumaster.handlers.auth import LoginHandler, LogoutHandler, ValidateHandler, FreshHandler
 from jxaumaster.config import STATIC_ROOT, HTML_ROOT
@@ -32,7 +32,7 @@ class Application(tornado.web.Application):
             ('/search/student?', StudentQueryHandler),
             ('/student/grade?', GradeQueryHandler),
             ('/student/exam?', ExamQueryHandler),
-            # ('/static/(.*)', BaseStaticFileHandler),
+            ('.*', BaseHandler),
         ]
 
         settings = {

@@ -1,4 +1,5 @@
 import React from 'react';
+import Login from './Login';
 
 
 export default class App extends React.Component {
@@ -8,7 +9,10 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <h1>Jxau Master</h1>
+        <div className="application">
+            <Login />
+        </div>
     );
   }
+
 }
