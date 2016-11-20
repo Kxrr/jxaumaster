@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import uuid
 import base64
 import pickle
 
 from jxaumaster.config.settings import COOKIES_NAME
 from jxaumaster.data.r_models import db_session, Session
+from jxaumaster.config import STATIC_ROOT
 
 import tornado.web
 
@@ -61,6 +63,12 @@ class BaseHandler(tornado.web.RequestHandler):
         }
         self.produce(error=error)
         return self.response()
+
+
+class BaseStaticFileHandler(tornado.web.StaticFileHandler):
+    def initialize(self, path, default_filename=None):
+        super(BaseStaticFileHandler, self).initialize(STATIC_ROOT, default_filename)
+
 
 if __name__ == '__main__':
     pass

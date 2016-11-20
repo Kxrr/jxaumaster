@@ -1,6 +1,7 @@
 .idea
 logs
 node_modules
+build
 
 *.log
 *.pyc

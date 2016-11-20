@@ -4,17 +4,21 @@ import tornado.gen
 import tornado.ioloop
 from tornado.options import define, options
 
-from jxaumaster.handlers.base import BaseHandler
+from jxaumaster.handlers.base import BaseHandler, BaseStaticFileHandler
 from jxaumaster.handlers.query import StudentQueryHandler, GradeQueryHandler, ExamQueryHandler
 from jxaumaster.handlers.auth import LoginHandler, LogoutHandler, ValidateHandler, FreshHandler
+from jxaumaster.config import STATIC_ROOT, HTML_ROOT
 from jxaumaster.utils.log import logger
 
 define("port", default=8888, help="run on the given port", type=int)
 
 
 class MainHandler(BaseHandler):
+    def prepare(self):
+        pass
+
     def get(self, *args, **kwargs):
-        self.write('hello')
+        return self.render('index.html')
 
 
 class Application(tornado.web.Application):
@@ -28,12 +32,15 @@ class Application(tornado.web.Application):
             ('/search/student?', StudentQueryHandler),
             ('/student/grade?', GradeQueryHandler),
             ('/student/exam?', ExamQueryHandler),
-            ('.*', BaseHandler),
+            # ('/static/(.*)', BaseStaticFileHandler),
         ]
 
         settings = {
             'cookie_secret': b'(\xd0aZ\x87\x0f\x9f\x8c\x95Y0JbD\x12\x8c',
             'login_url': '/login',
+            'static_path': STATIC_ROOT,
+            'template_path': HTML_ROOT,
+            'debug': False,
         }
 
         super(Application, self).__init__(handlers=handlers, **settings)
