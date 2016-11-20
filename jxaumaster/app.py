@@ -40,7 +40,7 @@ class Application(tornado.web.Application):
             'login_url': '/login',
             'static_path': STATIC_ROOT,
             'template_path': HTML_ROOT,
-            'debug': False,
+            'debug': True,
         }
 
         super(Application, self).__init__(handlers=handlers, **settings)
